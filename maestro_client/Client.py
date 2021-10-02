@@ -42,12 +42,19 @@ class Task:
 
         return task
 
+
 class Client:
     def __init__(self, maestro_endpoint):
         self.__maestro_endpoint = maestro_endpoint
 
     def launch_task(
-            self, owner: str, queue: str, task_payload: str, retries: int = 0, timeout: int = 900, executes_in: int = 0
+        self,
+        owner: str,
+        queue: str,
+        task_payload: str,
+        retries: int = 0,
+        timeout: int = 900,
+        executes_in: int = 0,
     ) -> str:
         """Launches a task.
 
@@ -75,7 +82,9 @@ class Client:
             "payload": task_payload,
         }
         if executes_in > 0:
-            payload["not_before"] = datetime.datetime.now().timestamp() + executes_in
+            payload["not_before"] = (
+                datetime.datetime.now().timestamp() + executes_in
+            )
 
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
@@ -198,7 +207,64 @@ class Client:
 
         return resp.json()
 
-    def launch_task_list(self, tasks: List[Tuple[str, str, str]], retries: int = 0, timeout: int  = 900) -> List[str]:
+    def cancel_task(self, task_id: str) -> None:
+        """Cancel a task from maestro.
+
+        Given its id the task is cancelled from maestro.
+
+        Args:
+            task_id: the identifier of the task
+
+        Raises:
+            FileNotFoundError: This task does not exists
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/task/cancel"),
+            json={"task_id": task_id},
+        )
+        if resp.status_code == 404:
+            raise FileNotFoundError("Could not find this task")
+        elif resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
+    def complete_task(self, task_id: str, result: str) -> None:
+        """Complete a task in maestro.
+
+        Given its id and its result the task is marked completed from maestro.
+
+        Args:
+            task_id: the identifier of the task
+
+        Raises:
+            FileNotFoundError: This task does not exists
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/task/complete"),
+            json={"task_id": task_id, "result": result},
+        )
+        if resp.status_code == 404:
+            raise FileNotFoundError("Could not find this task")
+        elif resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
+    def launch_task_list(
+        self,
+        tasks: List[Tuple[str, str, str]],
+        retries: int = 0,
+        timeout: int = 900,
+    ) -> List[str]:
         """Launches a list a task.
 
         Each task is represented a 3-uple that will be added to maestro.
