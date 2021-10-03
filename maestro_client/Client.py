@@ -240,6 +240,7 @@ class Client:
 
         Args:
             task_id: the identifier of the task
+            result: the result for the task
 
         Raises:
             FileNotFoundError: This task does not exists
@@ -248,6 +249,32 @@ class Client:
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/complete"),
             json={"task_id": task_id, "result": result},
+        )
+        if resp.status_code == 404:
+            raise FileNotFoundError("Could not find this task")
+        elif resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
+    def fail_task(self, task_id: str) -> None:
+        """Fail a task in maestro.
+
+        Given its id the task is marked failed in maestro.
+
+        Args:
+            task_id: the identifier of the task
+
+        Raises:
+            FileNotFoundError: This task does not exists
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/task/fail"),
+            json={"task_id": task_id},
         )
         if resp.status_code == 404:
             raise FileNotFoundError("Could not find this task")
