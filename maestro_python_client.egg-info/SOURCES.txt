@@ -1,0 +1,9 @@
+README.md
+setup.py
+maestro_python_client/Client.py
+maestro_python_client/__init__.py
+maestro_python_client.egg-info/PKG-INFO
+maestro_python_client.egg-info/SOURCES.txt
+maestro_python_client.egg-info/dependency_links.txt
+maestro_python_client.egg-info/requires.txt
+maestro_python_client.egg-info/top_level.txt

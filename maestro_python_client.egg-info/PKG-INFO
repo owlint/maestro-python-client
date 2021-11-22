@@ -1,0 +1,20 @@
+Metadata-Version: 2.1
+Name: maestro-python-client
+Version: 0.8.0
+Summary: Maestro client in python
+Home-page: https://github.com/owlint/maestro_python_client
+Author: Laurent Evrard
+Author-email: evrardlaurent77@gmail.com
+License: WTFPL
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Development Status :: 1 - Planning
+Classifier: License :: OSI Approved
+Classifier: Natural Language :: French
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Communications
+
+# maestro_python_client
+
+

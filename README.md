@@ -1,1 +1,1 @@
-# maestro-python-client
+# maestro_python_client

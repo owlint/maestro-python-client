@@ -3,15 +3,15 @@
 
 from setuptools import find_packages, setup
 
-import maestro_client
+import maestro_python_client
 
 # Ceci n'est qu'un appel de fonction. Mais il est trèèèèèèèèèèès long
 # et il comporte beaucoup de paramètres
 setup(
     # le nom de votre bibliothèque, tel qu'il apparaitre sur pypi
-    name="maestro_client",
+    name="maestro_python_client",
     # la version du code
-    version=maestro_client.__version__,
+    version=maestro_python_client.__version__,
     # Liste les packages à insérer dans la distribution
     # plutôt que de le faire à la main, on utilise la foncton
     # find_packages() de setuptools qui va cherche tous les packages
@@ -39,7 +39,7 @@ setup(
     # laisse pour que vous sachiez que ça existe car c'est très utile.
     install_requires=["requests"],
     # Une url qui pointe vers la page officielle de votre lib
-    url="https://github.com/owlint/maestro-python-client",
+    url="https://github.com/owlint/maestro_python_client",
     # Il est d'usage de mettre quelques metadata à propos de sa lib
     # Pour que les robots puissent facilement la classer.
     # La liste des marqueurs autorisées est longue:
@@ -53,7 +53,7 @@ setup(
         "License :: OSI Approved",
         "Natural Language :: French",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Communications",
     ],
     # A fournir uniquement si votre licence n'est pas listée dans "classifiers"
