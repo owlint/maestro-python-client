@@ -1,5 +1,5 @@
-from typing import List, Tuple, Dict, Any, Union
 import datetime
+from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -44,7 +44,7 @@ class Task:
 
 
 class Client:
-    def __init__(self, maestro_endpoint):
+    def __init__(self, maestro_endpoint: str):
         self.__maestro_endpoint = maestro_endpoint
 
     def launch_task(
@@ -82,9 +82,7 @@ class Client:
             "payload": task_payload,
         }
         if executes_in > 0:
-            payload["not_before"] = (
-                datetime.datetime.now().timestamp() + executes_in
-            )
+            payload["not_before"] = datetime.datetime.now().timestamp() + executes_in
 
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
