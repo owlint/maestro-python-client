@@ -55,6 +55,7 @@ class Client:
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> str:
         """Launches a task.
 
@@ -74,19 +75,11 @@ class Client:
         Raises:
             ValueError: Problem in the communication with maestro.
         """
-        payload = {
-            "owner": owner,
-            "queue": queue,
-            "retries": retries,
-            "timeout": timeout,
-            "payload": task_payload,
-        }
-        if executes_in > 0:
-            payload["not_before"] = datetime.datetime.now().timestamp() + executes_in
-
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
-            json=payload,
+            json=self.__serialize_task(
+                owner, queue, task_payload, retries, timeout, executes_in, start_timeout
+            ),
         )
         if resp.status_code > 400 or "error" in resp.json():
             raise ValueError(
@@ -289,6 +282,8 @@ class Client:
         tasks: List[Tuple[str, str, str]],
         retries: int = 0,
         timeout: int = 900,
+        executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> List[str]:
         """Launches a list a task.
 
@@ -311,13 +306,15 @@ class Client:
         payload = []
         for (owner, task_name, task_payload) in tasks:
             payload.append(
-                {
-                    "owner": owner,
-                    "queue": task_name,
-                    "retries": retries,
-                    "timeout": timeout,
-                    "payload": task_payload,
-                }
+                self.__serialize_task(
+                    owner,
+                    task_name,
+                    task_payload,
+                    retries,
+                    timeout,
+                    executes_in,
+                    start_timeout,
+                )
             )
 
         resp = requests.post(
@@ -330,3 +327,29 @@ class Client:
                 f"response is {resp.content}"
             )
         return resp.json()["task_ids"]
+
+    @staticmethod
+    def __serialize_task(
+        owner: str,
+        queue: str,
+        task_payload: str,
+        retries: int,
+        timeout: int,
+        executes_in: int,
+        start_timeout: int,
+    ) -> dict[str, Any]:
+        task = {
+            "owner": owner,
+            "queue": queue,
+            "retries": retries,
+            "timeout": timeout,
+            "payload": task_payload,
+        }
+
+        if executes_in > 0:
+            task["not_before"] = datetime.datetime.now().timestamp() + executes_in
+
+        if start_timeout > 0:
+            task["startTimeout"] = datetime.datetime.now().timestamp() + executes_in
+
+        return task

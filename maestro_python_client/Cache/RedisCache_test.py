@@ -40,3 +40,27 @@ def test_put(subtests):
         cache.put(key, "new")
 
         assert cache.get(key) == "new"
+
+
+def test_delete(subtests):
+    cache = RedisCache(new_test_redis())
+
+    with subtests.test("put new"):
+        key = unique_str()
+        cache.put(key, "value")
+        cache.delete(key)
+
+        with raises(ValueError):
+            cache.get(key)
+
+
+def test_set_ttl(subtests):
+    redis = new_test_redis()
+    cache = RedisCache(redis)
+
+    with subtests.test("put new"):
+        key = unique_str()
+        cache.put(key, "value")
+        cache.set_ttl(key, 42)
+
+        assert redis.ttl(key) == 42

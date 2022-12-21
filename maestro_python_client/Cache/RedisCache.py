@@ -20,3 +20,9 @@ class RedisCache(Cache):
     def put(self, key: str, value: str, extra_ttl: int = 0):
         if not self.__redis.set(key, value.encode("utf-8"), ex=self.__ttl + extra_ttl):
             raise ValueError(f"Could not add {key} to cache")
+
+    def delete(self, key: str):
+        self.__redis.delete(key)
+
+    def set_ttl(self, key: str, ttl: int):
+        self.__redis.expire(key, ttl)
