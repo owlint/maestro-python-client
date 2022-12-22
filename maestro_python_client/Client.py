@@ -1,5 +1,5 @@
-from typing import List, Tuple, Dict, Any, Union
 import datetime
+from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
@@ -44,7 +44,7 @@ class Task:
 
 
 class Client:
-    def __init__(self, maestro_endpoint):
+    def __init__(self, maestro_endpoint: str):
         self.__maestro_endpoint = maestro_endpoint
 
     def launch_task(
@@ -55,6 +55,7 @@ class Client:
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> str:
         """Launches a task.
 
@@ -67,6 +68,7 @@ class Client:
             retries: Number of allowed retries in case of fail or timeouts.
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start.
 
         Returns:
             A string representing the Maestro task id
@@ -74,21 +76,12 @@ class Client:
         Raises:
             ValueError: Problem in the communication with maestro.
         """
-        payload = {
-            "owner": owner,
-            "queue": queue,
-            "retries": retries,
-            "timeout": timeout,
-            "payload": task_payload,
-        }
-        if executes_in > 0:
-            payload["not_before"] = (
-                datetime.datetime.now().timestamp() + executes_in
-            )
 
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
-            json=payload,
+            json=self.__serialize_task(
+                owner, queue, task_payload, retries, timeout, executes_in, start_timeout
+            ),
         )
         if resp.status_code > 400 or "error" in resp.json():
             raise ValueError(
@@ -291,6 +284,8 @@ class Client:
         tasks: List[Tuple[str, str, str]],
         retries: int = 0,
         timeout: int = 900,
+        executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> List[str]:
         """Launches a list a task.
 
@@ -302,6 +297,10 @@ class Client:
                 1. The owner of the task (as str)
                 2. The queue
                 3. The payload
+            retries: Number of allowed retries in case of fail or timeouts.
+            timeout: Allowed time span for the task to execute.
+            executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start.
 
         Returns:
             A list of string representing the identifiers of the tasks
@@ -313,13 +312,15 @@ class Client:
         payload = []
         for (owner, task_name, task_payload) in tasks:
             payload.append(
-                {
-                    "owner": owner,
-                    "queue": task_name,
-                    "retries": retries,
-                    "timeout": timeout,
-                    "payload": task_payload,
-                }
+                self.__serialize_task(
+                    owner,
+                    task_name,
+                    task_payload,
+                    retries,
+                    timeout,
+                    executes_in,
+                    start_timeout,
+                )
             )
 
         resp = requests.post(
@@ -332,3 +333,29 @@ class Client:
                 f"response is {resp.content}"
             )
         return resp.json()["task_ids"]
+
+    @staticmethod
+    def __serialize_task(
+        owner: str,
+        queue: str,
+        task_payload: str,
+        retries: int,
+        timeout: int,
+        executes_in: int,
+        start_timeout: int,
+    ) -> dict[str, Any]:
+        task = {
+            "owner": owner,
+            "queue": queue,
+            "retries": retries,
+            "timeout": timeout,
+            "payload": task_payload,
+        }
+
+        if executes_in > 0:
+            task["not_before"] = datetime.datetime.now().timestamp() + executes_in
+
+        if start_timeout > 0:
+            task["startTimeout"] = datetime.datetime.now().timestamp() + executes_in
+
+        return task

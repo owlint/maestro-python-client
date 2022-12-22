@@ -6,8 +6,11 @@ name = "pypi"
 [packages]
 requests = "*"
 twine = "*"
+redis = "*"
 
 [dev-packages]
+pytest-subtests = "*"
+pytest = "*"
 
 [requires]
 python_version = "3.10"
