@@ -68,6 +68,7 @@ class Client:
             retries: Number of allowed retries in case of fail or timeouts.
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start.
 
         Returns:
             A string representing the Maestro task id
@@ -75,6 +76,7 @@ class Client:
         Raises:
             ValueError: Problem in the communication with maestro.
         """
+
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
             json=self.__serialize_task(
@@ -295,6 +297,10 @@ class Client:
                 1. The owner of the task (as str)
                 2. The queue
                 3. The payload
+            retries: Number of allowed retries in case of fail or timeouts.
+            timeout: Allowed time span for the task to execute.
+            executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start.
 
         Returns:
             A list of string representing the identifiers of the tasks

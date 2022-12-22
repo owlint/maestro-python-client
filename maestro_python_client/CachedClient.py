@@ -24,11 +24,31 @@ class CachedClient(Client):
         owner: str,
         queue: str,
         task_payload: str,
-        start_timeout: int = 0,
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> str:
+        """Launches a task.
+
+        Launches a task to be executed by Maestro.
+
+        Args:
+            owner: owner of the task. Used for fair scheduling.
+            queue: name of the queue to use.
+            task_payload: encoded payload for the task.
+            retries: Number of allowed retries in case of fail or timeouts.
+            timeout: Allowed time span for the task to execute.
+            executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+
+        Returns:
+            A string representing the Maestro task id
+
+        Raises:
+            ValueError: Problem in the communication with maestro or invalid start_time.
+        """
+
         if queue in self.__cached_queues and start_timeout <= 0:
             raise ValueError("Start timeout must be > 0 for cached task")
 
@@ -91,11 +111,34 @@ class CachedClient(Client):
     def launch_task_list(
         self,
         tasks: List[Tuple[str, str, str]],
-        start_timeout: int = 0,
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
+        start_timeout: int = 0,
     ) -> List[str]:
+        """Launches a list a task.
+
+        Each task is represented a 3-uple that will be added to maestro.
+
+        Args:
+            tasks:
+                The list of tasks to be added. Each task is a 3-uple containing
+                1. The owner of the task (as str)
+                2. The queue
+                3. The payload
+            retries: Number of allowed retries in case of fail or timeouts.
+            timeout: Allowed time span for the task to execute.
+            executes_in: Number of seconds to wait before executing the task
+            start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+
+        Returns:
+            A list of string representing the identifiers of the tasks
+
+
+        Raises:
+            ValueError: Error in communication with maestro or invalid start_time
+        """
+
         payload_ttl = (
             executes_in
             + self.__completed_task_ttl

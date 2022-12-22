@@ -64,13 +64,13 @@ def test_launch_task(requests, subtests):
     with subtests.test("Queue not cached"):
         mock = MagicMock()
         client = CachedClient("", mock, ["cached"])
-        client.launch_task(unique_str(), "not_cached", "payload", 100)
+        client.launch_task(unique_str(), "not_cached", "payload", start_timeout=100)
         assert not mock.put.called
 
     with subtests.test("Queue cached"):
         mock = MagicMock()
         client = CachedClient("", mock, ["cached"])
-        client.launch_task(unique_str(), "cached", "payload", 100)
+        client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
         assert mock.put.called
 
     with subtests.test("Start timeout 0 cached should fail"):
@@ -94,13 +94,17 @@ def test_launch_task_list(requests, subtests):
     with subtests.test("Queue not cached"):
         mock = MagicMock()
         client = CachedClient("", mock, ["cached"])
-        client.launch_task_list([(unique_str(), "not_cached", "payload")], 100)
+        client.launch_task_list(
+            [(unique_str(), "not_cached", "payload")], start_timeout=100
+        )
         assert not mock.put.called
 
     with subtests.test("Queue cached"):
         mock = MagicMock()
         client = CachedClient("", mock, ["cached"])
-        client.launch_task_list([(unique_str(), "cached", "payload")], 100)
+        client.launch_task_list(
+            [(unique_str(), "cached", "payload")], start_timeout=100
+        )
         assert mock.put.called
 
     with subtests.test("Start timeout 0 cached should fail"):
@@ -130,7 +134,7 @@ def test_task_getters(requests, subtests, json_task):
         with subtests.test("With cache"):
             cache = TestCache()
             client = CachedClient("", cache, ["cached"])
-            client.launch_task(unique_str(), "cached", "payload", 100)
+            client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
 
             response_mock.json.return_value = {
                 **json_task,
@@ -155,7 +159,7 @@ def test_task_getters(requests, subtests, json_task):
         with subtests.test("Without cache"):
             cache = TestCache()
             client = CachedClient("", cache, ["cached"])
-            client.launch_task(unique_str(), "not_cached", "payload", 100)
+            client.launch_task(unique_str(), "not_cached", "payload", start_timeout=100)
 
             response_mock.json.return_value = {
                 **json_task,
@@ -188,7 +192,7 @@ def test_complete_task(requests, subtests, json_task):
     with subtests.test("With cache"):
         cache = TestCache()
         client = CachedClient("", cache, ["cached"])
-        client.launch_task(unique_str(), "cached", "payload", 100)
+        client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
 
         response_mock.json.return_value = {
             **json_task,
@@ -201,7 +205,7 @@ def test_complete_task(requests, subtests, json_task):
     with subtests.test("Without cache"):
         cache = TestCache()
         client = CachedClient("", cache, ["cached"])
-        client.launch_task(unique_str(), "not_cached", "payload", 100)
+        client.launch_task(unique_str(), "not_cached", "payload", start_timeout=100)
 
         response_mock.json.return_value = {
             **json_task,
@@ -221,7 +225,7 @@ def test_delete_task(requests, subtests, json_task):
     with subtests.test("With cache and result"):
         cache = TestCache()
         client = CachedClient("", cache, ["cached"])
-        client.launch_task(unique_str(), "cached", "payload", 100)
+        client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
         response_mock.json.return_value = {
             **json_task,
             "task_queue": "cached",
@@ -244,7 +248,7 @@ def test_delete_task(requests, subtests, json_task):
     with subtests.test("With cache no result"):
         cache = TestCache()
         client = CachedClient("", cache, ["cached"])
-        client.launch_task(unique_str(), "cached", "payload", 100)
+        client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
 
         response_mock.json.return_value = {
             **json_task,
@@ -261,7 +265,7 @@ def test_delete_task(requests, subtests, json_task):
     with subtests.test("Without cache"):
         cache = TestCache()
         client = CachedClient("", cache, ["cached"])
-        client.launch_task(unique_str(), "not_cached", "payload", 100)
+        client.launch_task(unique_str(), "not_cached", "payload", start_timeout=100)
 
         response_mock.json.return_value = {
             **json_task,
@@ -288,7 +292,7 @@ def test_task_stoppers(requests, subtests, json_task):
         with subtests.test("With cache"):
             cache = MagicMock()
             client = CachedClient("", cache, ["cached"])
-            client.launch_task(unique_str(), "cached", "payload", 100)
+            client.launch_task(unique_str(), "cached", "payload", start_timeout=100)
 
             response_mock.json.return_value = {
                 **json_task,
@@ -303,7 +307,7 @@ def test_task_stoppers(requests, subtests, json_task):
         with subtests.test("Without cache"):
             cache = MagicMock()
             client = CachedClient("", cache, ["cached"])
-            client.launch_task(unique_str(), "not_cached", "payload", 100)
+            client.launch_task(unique_str(), "not_cached", "payload", start_timeout=100)
 
             response_mock.json.return_value = {
                 **json_task,
