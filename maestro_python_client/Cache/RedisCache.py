@@ -4,10 +4,9 @@ from maestro_python_client.Cache.Cache import Cache
 
 
 class RedisCache(Cache):
-    def __init__(self, redis: Redis, ttl: int = 300) -> None:
+    def __init__(self, redis: Redis) -> None:
         super().__init__()
         self.__redis = redis
-        self.__ttl = ttl
 
     def get(self, key: str) -> str:
         payload = self.__redis.get(key)
@@ -17,8 +16,8 @@ class RedisCache(Cache):
 
         return payload.decode("utf-8")
 
-    def put(self, key: str, value: str, extra_ttl: int = 0):
-        if not self.__redis.set(key, value.encode("utf-8"), ex=self.__ttl + extra_ttl):
+    def put(self, key: str, value: str, ttl: int | None = None):
+        if not self.__redis.set(key, value.encode("utf-8"), ex=ttl):
             raise ValueError(f"Could not add {key} to cache")
 
     def delete(self, key: str):

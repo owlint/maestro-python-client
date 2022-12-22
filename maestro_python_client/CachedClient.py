@@ -24,11 +24,14 @@ class CachedClient(Client):
         owner: str,
         queue: str,
         task_payload: str,
-        start_timeout: int,
+        start_timeout: int = 0,
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
     ) -> str:
+        if queue in self.__cached_queues and start_timeout <= 0:
+            raise ValueError("Start timeout must be > 0 for cached task")
+
         ttl = (
             executes_in
             + self.__completed_task_ttl
@@ -88,7 +91,7 @@ class CachedClient(Client):
     def launch_task_list(
         self,
         tasks: List[Tuple[str, str, str]],
-        start_timeout: int,
+        start_timeout: int = 0,
         retries: int = 0,
         timeout: int = 900,
         executes_in: int = 0,
@@ -100,6 +103,9 @@ class CachedClient(Client):
         )
 
         for i, (owner, queue, payload) in enumerate(tasks):
+            if queue in self.__cached_queues and start_timeout <= 0:
+                raise ValueError("Start timeout must be > 0 for cached task")
+
             tasks[i] = (
                 owner,
                 queue,

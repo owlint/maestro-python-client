@@ -1,7 +1,7 @@
 from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
-from pytest import fixture
+from pytest import fixture, raises
 
 from maestro_python_client.Cache.Cache import Cache
 from maestro_python_client.CachedClient import CachedClient
@@ -35,7 +35,7 @@ class TestCache(Cache):
     def cache(self) -> dict[str, str]:
         return deepcopy(self.__cache)
 
-    def put(self, key: str, value: str, ttl: int = 0):
+    def put(self, key: str, value: str, ttl: int | None = None):
         self.__cache[key] = value
 
     def get(self, key: str) -> str:
@@ -73,6 +73,17 @@ def test_launch_task(requests, subtests):
         client.launch_task(unique_str(), "cached", "payload", 100)
         assert mock.put.called
 
+    with subtests.test("Start timeout 0 cached should fail"):
+        mock = MagicMock()
+        client = CachedClient("", mock, ["cached"])
+        with raises(ValueError):
+            client.launch_task(unique_str(), "cached", "payload", start_timeout=0)
+
+    with subtests.test("Start timeout 0 not cached should not fail"):
+        mock = MagicMock()
+        client = CachedClient("", mock, ["cached"])
+        client.launch_task(unique_str(), "not_cached", "payload", start_timeout=0)
+
 
 @patch("requests.post")
 def test_launch_task_list(requests, subtests):
@@ -91,6 +102,21 @@ def test_launch_task_list(requests, subtests):
         client = CachedClient("", mock, ["cached"])
         client.launch_task_list([(unique_str(), "cached", "payload")], 100)
         assert mock.put.called
+
+    with subtests.test("Start timeout 0 cached should fail"):
+        mock = MagicMock()
+        client = CachedClient("", mock, ["cached"])
+        with raises(ValueError):
+            client.launch_task_list(
+                [(unique_str(), "cached", "payload")], start_timeout=0
+            )
+
+    with subtests.test("Start timeout 0 not cached should not fail"):
+        mock = MagicMock()
+        client = CachedClient("", mock, ["cached"])
+        client.launch_task_list(
+            [(unique_str(), "not_cached", "payload")], start_timeout=0
+        )
 
 
 @patch("requests.post")
