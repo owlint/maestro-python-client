@@ -11,7 +11,7 @@ class CachedClient(Client):
         maestro_endpoint: str,
         cache: Cache,
         cached_queues: list[str] = [],
-        completed_task_ttl=900,
+        completed_task_ttl: int = 900,
         **kwargs,
     ) -> None:
         super().__init__(maestro_endpoint, **kwargs)
