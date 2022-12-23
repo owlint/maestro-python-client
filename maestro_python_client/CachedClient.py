@@ -106,7 +106,7 @@ class CachedClient(Client):
         if task.result:
             self.__delete(task.task_queue, task.result)
 
-        super().fail_task(task_id)
+        super().delete_task(task_id)
 
     def launch_task_list(
         self,
