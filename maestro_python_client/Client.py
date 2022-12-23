@@ -116,7 +116,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json())
+        return Task.from_json(resp.json()["task"])
 
     def next(self, queue: str) -> Union[Task, None]:
         """Get the following pending task.
@@ -143,7 +143,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json()) if resp.json() != {} else None
+        return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
 
     def consume(self, queue: str) -> Union[Task, None]:
         """Consumes a task result from the queue.
@@ -172,7 +172,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json()) if resp.json() != {} else None
+        return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
 
     def delete_task(self, task_id: str) -> None:
         """Delete a task from maestro.
