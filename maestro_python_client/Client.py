@@ -56,6 +56,7 @@ class Client:
         timeout: int = 900,
         executes_in: int = 0,
         start_timeout: int = 0,
+        callback_url: str = "",
     ) -> str:
         """Launches a task.
 
@@ -80,7 +81,7 @@ class Client:
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
             json=self.__serialize_task(
-                owner, queue, task_payload, retries, timeout, executes_in, start_timeout
+                owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
             ),
         )
         if resp.status_code > 400 or "error" in resp.json():
@@ -286,6 +287,7 @@ class Client:
         timeout: int = 900,
         executes_in: int = 0,
         start_timeout: int = 0,
+        callback_url: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -320,6 +322,7 @@ class Client:
                     timeout,
                     executes_in,
                     start_timeout,
+                    callback_url,
                 )
             )
 
@@ -343,6 +346,7 @@ class Client:
         timeout: int,
         executes_in: int,
         start_timeout: int,
+        callback_url: str,
     ) -> dict[str, Any]:
         task = {
             "owner": owner,
@@ -350,6 +354,7 @@ class Client:
             "retries": retries,
             "timeout": timeout,
             "payload": task_payload,
+            "callback_url": callback_url,
         }
 
         if executes_in > 0:

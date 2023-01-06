@@ -28,6 +28,7 @@ class CachedClient(Client):
         timeout: int = 900,
         executes_in: int = 0,
         start_timeout: int = 0,
+        callback_url: str = "",
     ) -> str:
         """Launches a task.
 
@@ -63,7 +64,7 @@ class CachedClient(Client):
             ttl,
         )
         return super().launch_task(
-            owner, queue, task_payload, retries, timeout, executes_in, start_timeout
+            owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
         )
 
     def next(self, queue: str) -> Task | None:
@@ -115,6 +116,7 @@ class CachedClient(Client):
         timeout: int = 900,
         executes_in: int = 0,
         start_timeout: int = 0,
+        callback_url: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -160,7 +162,7 @@ class CachedClient(Client):
             )
 
         return super().launch_task_list(
-            tasks, retries, timeout, executes_in, start_timeout
+            tasks, retries, timeout, executes_in, start_timeout, callback_url,
         )
 
     def __task_from_cache(self, task: Task | None) -> Task | None:
