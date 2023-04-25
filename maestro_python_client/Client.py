@@ -70,6 +70,7 @@ class Client:
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start.
+            callback_url: URL called after task execution is completed.
 
         Returns:
             A string representing the Maestro task id
