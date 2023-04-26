@@ -37,7 +37,7 @@ setup(
     #
     # Dans notre cas on en a pas besoin, donc je le commente, mais je le
     # laisse pour que vous sachiez que ça existe car c'est très utile.
-    install_requires=["requests"],
+    install_requires=["requests", "click"],
     # Une url qui pointe vers la page officielle de votre lib
     url="https://github.com/owlint/maestro_python_client",
     # Il est d'usage de mettre quelques metadata à propos de sa lib
