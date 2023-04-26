@@ -59,6 +59,7 @@ setup(
     # A fournir uniquement si votre licence n'est pas listée dans "classifiers"
     # ce qui est notre cas
     license="WTFPL",
+    scripts=["maestro_client"],
     # Il y a encore une chiée de paramètres possibles, mais avec ça vous
     # couvrez 90% des besoins
 )
