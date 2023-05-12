@@ -293,7 +293,7 @@ class Client:
 
         return resp.json()
 
-    def consume_task(self, task_id: str) -> dict[str, Any]:
+    def consume_task(self, task_id: str) -> Dict[str, Any]:
         """Consume a task from maestro.
 
         Given its id the task is marked consumed in maestro.
@@ -319,7 +319,7 @@ class Client:
 
         return resp.json()
 
-    def tasks_by_owner_ids(self, owner_ids: list[str]):
+    def tasks_by_owner_ids(self, owner_ids: List[str]):
         """Retrieve a list of tasks of an owner from maestro
         Args:
             owner_ids: a list of owner ids
