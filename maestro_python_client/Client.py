@@ -294,9 +294,9 @@ class Client:
         return resp.json()
 
     def consume_task(self, task_id: str) -> dict[str, Any]:
-        """Consule a task from maestro.
+        """Consume a task from maestro.
 
-        Given its id the task is removed from maestro.
+        Given its id the task is marked consumed in maestro.
 
         Args:
             task_id: the identifier of the task
@@ -318,6 +318,27 @@ class Client:
             )
 
         return resp.json()
+
+    def tasks_by_owner_ids(self, owner_ids: list[str]):
+        """Retrieve a list of tasks of an owner from maestro
+        Args:
+            owner_ids: a list of owner ids
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "owners/tasks/get"),
+            json={"owner_ids": owner_ids},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()["tasks"]
 
     def launch_task_list(
         self,

@@ -116,9 +116,6 @@ class CachedClient(Client):
 
         super().delete_task(task_id, consume=consume)
 
-    def consume_task(self, task_id: str) -> dict[str, Any]:
-        return super().consume_task(task_id)
-
     def launch_task_list(
         self,
         tasks: List[Tuple[str, str, str]],
