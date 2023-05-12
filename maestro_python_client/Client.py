@@ -20,6 +20,7 @@ class Task:
         self.result: Union[None, str] = None
         self.not_before: int = 0
         self.consumed = False
+        self.parent_task_id = ""
 
     @classmethod
     def from_json(cls, payload: Dict[str, Any]) -> "Task":
@@ -36,6 +37,7 @@ class Task:
         task.created_at = datetime.datetime.fromtimestamp(payload["created_at"])
         task.updated_at = datetime.datetime.fromtimestamp(payload["updated_at"])
         task.consumed = payload.get("consumed", False)
+        task.parent_task_id = payload.get("parent_task_id", "")
 
         if "result" in payload:
             task.result = payload["result"]
@@ -59,6 +61,7 @@ class Client:
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -73,6 +76,7 @@ class Client:
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start.
             callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A string representing the Maestro task id
@@ -92,6 +96,7 @@ class Client:
                 executes_in,
                 start_timeout,
                 callback_url,
+                parent_task_id,
             ),
         )
         if resp.status_code > 400 or "error" in resp.json():
@@ -348,6 +353,7 @@ class Client:
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -363,6 +369,8 @@ class Client:
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A list of string representing the identifiers of the tasks
@@ -383,6 +391,7 @@ class Client:
                     executes_in,
                     start_timeout,
                     callback_url,
+                    parent_task_id,
                 )
             )
 
@@ -407,6 +416,7 @@ class Client:
         executes_in: int,
         start_timeout: int,
         callback_url: str,
+        parent_task_id: str,
     ) -> dict[str, Any]:
         task = {
             "owner": owner,
@@ -415,6 +425,7 @@ class Client:
             "timeout": timeout,
             "payload": task_payload,
             "callback_url": callback_url,
+            "parent_task_id": parent_task_id,
         }
 
         if executes_in > 0:

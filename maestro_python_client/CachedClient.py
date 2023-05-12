@@ -29,6 +29,7 @@ class CachedClient(Client):
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -42,6 +43,8 @@ class CachedClient(Client):
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A string representing the Maestro task id
@@ -72,6 +75,7 @@ class CachedClient(Client):
             executes_in,
             start_timeout,
             callback_url,
+            parent_task_id,
         )
 
     def next(self, queue: str) -> Task | None:
@@ -124,6 +128,7 @@ class CachedClient(Client):
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -139,6 +144,8 @@ class CachedClient(Client):
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A list of string representing the identifiers of the tasks
@@ -175,6 +182,7 @@ class CachedClient(Client):
             executes_in,
             start_timeout,
             callback_url,
+            parent_task_id,
         )
 
     def __task_from_cache(self, task: Task | None) -> Task | None:
