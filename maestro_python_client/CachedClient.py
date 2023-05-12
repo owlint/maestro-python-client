@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from uuid import uuid4
 
 from maestro_python_client.Cache.Cache import Cache
@@ -64,7 +64,14 @@ class CachedClient(Client):
             ttl,
         )
         return super().launch_task(
-            owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
+            owner,
+            queue,
+            task_payload,
+            retries,
+            timeout,
+            executes_in,
+            start_timeout,
+            callback_url,
         )
 
     def next(self, queue: str) -> Task | None:
@@ -101,13 +108,16 @@ class CachedClient(Client):
 
         super().fail_task(task_id)
 
-    def delete_task(self, task_id: str) -> None:
+    def delete_task(self, task_id: str, consume: bool = False) -> None:
         task = super().task_state(task_id)
         self.__delete(task.task_queue, task.payload)
         if task.result:
             self.__delete(task.task_queue, task.result)
 
-        super().delete_task(task_id)
+        super().delete_task(task_id, consume=consume)
+
+    def consume_task(self, task_id: str) -> dict[str, Any]:
+        return super().consume_task(task_id)
 
     def launch_task_list(
         self,
@@ -162,7 +172,12 @@ class CachedClient(Client):
             )
 
         return super().launch_task_list(
-            tasks, retries, timeout, executes_in, start_timeout, callback_url,
+            tasks,
+            retries,
+            timeout,
+            executes_in,
+            start_timeout,
+            callback_url,
         )
 
     def __task_from_cache(self, task: Task | None) -> Task | None:

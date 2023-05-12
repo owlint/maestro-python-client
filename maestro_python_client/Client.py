@@ -19,6 +19,7 @@ class Task:
         self.updated_at: datetime.datetime = datetime.datetime.now()
         self.result: Union[None, str] = None
         self.not_before: int = 0
+        self.consumed = False
 
     @classmethod
     def from_json(cls, payload: Dict[str, Any]) -> "Task":
@@ -34,6 +35,7 @@ class Task:
         task.max_retries = payload["max_retries"]
         task.created_at = datetime.datetime.fromtimestamp(payload["created_at"])
         task.updated_at = datetime.datetime.fromtimestamp(payload["updated_at"])
+        task.consumed = payload.get("consumed", False)
 
         if "result" in payload:
             task.result = payload["result"]
@@ -82,7 +84,14 @@ class Client:
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
             json=self.__serialize_task(
-                owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
+                owner,
+                queue,
+                task_payload,
+                retries,
+                timeout,
+                executes_in,
+                start_timeout,
+                callback_url,
             ),
         )
         if resp.status_code > 400 or "error" in resp.json():
@@ -176,7 +185,7 @@ class Client:
 
         return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
 
-    def delete_task(self, task_id: str) -> None:
+    def delete_task(self, task_id: str, consume: bool = False) -> None:
         """Delete a task from maestro.
 
         Given its id the task is removed from maestro.
@@ -190,7 +199,10 @@ class Client:
         """
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/delete"),
-            json={"task_id": task_id},
+            json={
+                "task_id": task_id,
+                "consume": consume,
+            },
         )
         if resp.status_code == 404:
             raise FileNotFoundError("Could not find this task")
@@ -269,6 +281,32 @@ class Client:
         """
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/fail"),
+            json={"task_id": task_id},
+        )
+        if resp.status_code == 404:
+            raise FileNotFoundError("Could not find this task")
+        elif resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
+    def consume_task(self, task_id: str) -> dict[str, Any]:
+        """Consule a task from maestro.
+
+        Given its id the task is removed from maestro.
+
+        Args:
+            task_id: the identifier of the task
+
+        Raises:
+            FileNotFoundError: This task does not exists
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/task/consume"),
             json={"task_id": task_id},
         )
         if resp.status_code == 404:
