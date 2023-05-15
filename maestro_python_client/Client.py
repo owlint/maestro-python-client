@@ -324,8 +324,8 @@ class Client:
 
         return resp.json()
 
-    def tasks_by_owner_ids(self, owner_ids: List[str]):
-        """Retrieve a list of tasks of an owner from maestro
+    def get_owners_history(self, owner_ids: List[str]) -> List[Dict[str, Any]]:
+        """Retrieve a list of tasks with childs a list of owner IDs.
         Args:
             owner_ids: a list of owner ids
 
@@ -333,7 +333,7 @@ class Client:
             ValueError: Error in communication with maestro
         """
         resp = requests.post(
-            urljoin(self.__maestro_endpoint, "owners/tasks/get"),
+            urljoin(self.__maestro_endpoint, "/api/owners/history/get"),
             json={"owner_ids": owner_ids},
         )
 
@@ -344,6 +344,27 @@ class Client:
             )
 
         return resp.json()["tasks"]
+
+    def delete_owners_history(self, owner_ids: List[str]) -> Dict[str, Any]:
+        """Delete history for all tasks associated to a list of owners.
+        Args:
+            owner_ids: a list of owner ids
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/owners/history/delete"),
+            json={"owner_ids": owner_ids},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
 
     def launch_task_list(
         self,
