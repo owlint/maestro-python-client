@@ -24,6 +24,7 @@ def json_task():
         "created_at": 1,
         "updated_at": 1,
         "not_before": 0,
+        "consumed": False,
     }
 
 

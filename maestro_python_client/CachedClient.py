@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from uuid import uuid4
 
 from maestro_python_client.Cache.Cache import Cache
@@ -29,6 +29,7 @@ class CachedClient(Client):
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -42,6 +43,8 @@ class CachedClient(Client):
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A string representing the Maestro task id
@@ -64,7 +67,15 @@ class CachedClient(Client):
             ttl,
         )
         return super().launch_task(
-            owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
+            owner,
+            queue,
+            task_payload,
+            retries,
+            timeout,
+            executes_in,
+            start_timeout,
+            callback_url,
+            parent_task_id,
         )
 
     def next(self, queue: str) -> Task | None:
@@ -101,13 +112,13 @@ class CachedClient(Client):
 
         super().fail_task(task_id)
 
-    def delete_task(self, task_id: str) -> None:
+    def delete_task(self, task_id: str, consume: bool = False) -> None:
         task = super().task_state(task_id)
         self.__delete(task.task_queue, task.payload)
         if task.result:
             self.__delete(task.task_queue, task.result)
 
-        super().delete_task(task_id)
+        super().delete_task(task_id, consume=consume)
 
     def launch_task_list(
         self,
@@ -117,6 +128,7 @@ class CachedClient(Client):
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -132,6 +144,8 @@ class CachedClient(Client):
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start. Must be > 0 if the task is in a cached queue.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A list of string representing the identifiers of the tasks
@@ -162,7 +176,13 @@ class CachedClient(Client):
             )
 
         return super().launch_task_list(
-            tasks, retries, timeout, executes_in, start_timeout, callback_url,
+            tasks,
+            retries,
+            timeout,
+            executes_in,
+            start_timeout,
+            callback_url,
+            parent_task_id,
         )
 
     def __task_from_cache(self, task: Task | None) -> Task | None:

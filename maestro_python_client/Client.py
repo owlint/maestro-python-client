@@ -19,6 +19,8 @@ class Task:
         self.updated_at: datetime.datetime = datetime.datetime.now()
         self.result: Union[None, str] = None
         self.not_before: int = 0
+        self.consumed = False
+        self.parent_task_id = ""
 
     @classmethod
     def from_json(cls, payload: Dict[str, Any]) -> "Task":
@@ -34,6 +36,8 @@ class Task:
         task.max_retries = payload["max_retries"]
         task.created_at = datetime.datetime.fromtimestamp(payload["created_at"])
         task.updated_at = datetime.datetime.fromtimestamp(payload["updated_at"])
+        task.consumed = payload.get("consumed", False)
+        task.parent_task_id = payload.get("parent_task_id", "")
 
         if "result" in payload:
             task.result = payload["result"]
@@ -57,6 +61,7 @@ class Client:
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -71,6 +76,7 @@ class Client:
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start.
             callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A string representing the Maestro task id
@@ -82,7 +88,15 @@ class Client:
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/create"),
             json=self.__serialize_task(
-                owner, queue, task_payload, retries, timeout, executes_in, start_timeout, callback_url,
+                owner,
+                queue,
+                task_payload,
+                retries,
+                timeout,
+                executes_in,
+                start_timeout,
+                callback_url,
+                parent_task_id,
             ),
         )
         if resp.status_code > 400 or "error" in resp.json():
@@ -176,7 +190,7 @@ class Client:
 
         return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
 
-    def delete_task(self, task_id: str) -> None:
+    def delete_task(self, task_id: str, consume: bool = False) -> None:
         """Delete a task from maestro.
 
         Given its id the task is removed from maestro.
@@ -190,7 +204,10 @@ class Client:
         """
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/task/delete"),
-            json={"task_id": task_id},
+            json={
+                "task_id": task_id,
+                "consume": consume,
+            },
         )
         if resp.status_code == 404:
             raise FileNotFoundError("Could not find this task")
@@ -281,6 +298,74 @@ class Client:
 
         return resp.json()
 
+    def consume_task(self, task_id: str) -> Dict[str, Any]:
+        """Consume a task from maestro.
+
+        Given its id the task is marked consumed in maestro.
+
+        Args:
+            task_id: the identifier of the task
+
+        Raises:
+            FileNotFoundError: This task does not exists
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/task/consume"),
+            json={"task_id": task_id},
+        )
+        if resp.status_code == 404:
+            raise FileNotFoundError("Could not find this task")
+        elif resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
+    def get_owners_history(self, owner_ids: List[str]) -> List[Dict[str, Any]]:
+        """Retrieve a list of tasks with childs a list of owner IDs.
+        Args:
+            owner_ids: a list of owner ids
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/owners/history/get"),
+            json={"owner_ids": owner_ids},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()["tasks"]
+
+    def delete_owners_history(self, owner_ids: List[str]) -> Dict[str, Any]:
+        """Delete history for all tasks associated to a list of owners.
+        Args:
+            owner_ids: a list of owner ids
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/owners/history/delete"),
+            json={"owner_ids": owner_ids},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return resp.json()
+
     def launch_task_list(
         self,
         tasks: List[Tuple[str, str, str]],
@@ -289,6 +374,7 @@ class Client:
         executes_in: int = 0,
         start_timeout: int = 0,
         callback_url: str = "",
+        parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -304,6 +390,8 @@ class Client:
             timeout: Allowed time span for the task to execute.
             executes_in: Number of seconds to wait before executing the task
             start_timeout: Allowed time span in seconds for the task to start.
+            callback_url: URL called after task execution is completed.
+            parent_task_id: Task ID of the parent, if any.
 
         Returns:
             A list of string representing the identifiers of the tasks
@@ -324,6 +412,7 @@ class Client:
                     executes_in,
                     start_timeout,
                     callback_url,
+                    parent_task_id,
                 )
             )
 
@@ -348,6 +437,7 @@ class Client:
         executes_in: int,
         start_timeout: int,
         callback_url: str,
+        parent_task_id: str,
     ) -> dict[str, Any]:
         task = {
             "owner": owner,
@@ -356,6 +446,7 @@ class Client:
             "timeout": timeout,
             "payload": task_payload,
             "callback_url": callback_url,
+            "parent_task_id": parent_task_id,
         }
 
         if executes_in > 0:
