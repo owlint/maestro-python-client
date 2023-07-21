@@ -1,0 +1,11 @@
+test:
+  stage: test
+  tags:
+    - local
+  before_script:
+    - pipenv sync -d
+  script:
+    - make lint
+    - make test
+  after_script:
+    - make down

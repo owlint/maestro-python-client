@@ -15,4 +15,7 @@ down:
 
 test: down up bare_test down
 
+lint:
+	pipenv run pre-commit run -a
+
 all: test run
