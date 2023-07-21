@@ -1,8 +1,10 @@
 import datetime
+from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urljoin
 
 import requests
+from typing_extensions import deprecated
 
 
 class Task:
@@ -23,7 +25,12 @@ class Task:
         self.parent_task_id = ""
 
     @classmethod
+    @deprecated("Task.from_dict() should be used instead")
     def from_json(cls, payload: Dict[str, Any]) -> "Task":
+        return cls.from_dict(payload)
+
+    @classmethod
+    def from_dict(cls, payload: Dict[str, Any]) -> "Task":
         task = cls()
 
         task.task_id = payload["task_id"]
@@ -45,6 +52,39 @@ class Task:
         task.not_before = payload["not_before"]
 
         return task
+
+
+@dataclass(frozen=True)
+class TaskHistory:
+    task_id: str = ""
+    parent_task_id: str = ""
+    owner: str = ""
+    task_queue: str = ""
+    state: str = ""
+    timeout: int = 0
+    retries: int = 0
+    start_timeout: int = 0
+    max_retries: int = 0
+    not_before: int = 0
+    version: int = 0
+    consumed: bool = False
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "TaskHistory":
+        return cls(
+            task_id=payload["task_id"],
+            parent_task_id=payload["parent_task_id"],
+            owner=payload["owner_id"],
+            task_queue=payload["task_queue"],
+            state=payload["state"],
+            timeout=payload["timeout"],
+            retries=payload["retries"],
+            max_retries=payload["max_retries"],
+            version=payload["version"],
+            not_before=payload["not_before"],
+            start_timeout=payload["start_timeout"],
+            consumed=payload["consumed"],
+        )
 
 
 class Client:
@@ -132,7 +172,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json()["task"])
+        return Task.from_dict(resp.json()["task"])
 
     def next(self, queue: str) -> Union[Task, None]:
         """Get the following pending task.
@@ -159,7 +199,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
+        return Task.from_dict(resp.json()["task"]) if resp.json() != {} else None
 
     def consume(self, queue: str) -> Union[Task, None]:
         """Consumes a task result from the queue.
@@ -188,7 +228,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return Task.from_json(resp.json()["task"]) if resp.json() != {} else None
+        return Task.from_dict(resp.json()["task"]) if resp.json() != {} else None
 
     def delete_task(self, task_id: str, consume: bool = False) -> None:
         """Delete a task from maestro.
@@ -324,7 +364,7 @@ class Client:
 
         return resp.json()
 
-    def get_owners_history(self, owner_ids: List[str]) -> List[Dict[str, Any]]:
+    def get_owners_history(self, owner_ids: List[str]) -> list[TaskHistory]:
         """Retrieve a list of tasks with childs a list of owner IDs.
         Args:
             owner_ids: a list of owner ids
@@ -343,7 +383,9 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return resp.json()["tasks"]
+        tasks = [TaskHistory.from_dict(task) for task in resp.json()["tasks"]]
+
+        return tasks
 
     def delete_owners_history(self, owner_ids: List[str]) -> Dict[str, Any]:
         """Delete history for all tasks associated to a list of owners.

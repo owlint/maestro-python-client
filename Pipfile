@@ -8,10 +8,12 @@ requests = "*"
 twine = "*"
 redis = "*"
 click = "*"
+typing-extensions = "*"
 
 [dev-packages]
 pytest-subtests = "*"
 pytest = "*"
+pre-commit = "*"
 
 [requires]
 python_version = "3.10"

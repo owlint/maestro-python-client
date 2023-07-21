@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple
+from typing import List, Tuple
 from uuid import uuid4
 
 from maestro_python_client.Cache.Cache import Cache
