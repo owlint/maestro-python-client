@@ -443,7 +443,7 @@ class Client:
             ValueError: Error in communication with maestro
         """
         payload = []
-        for (owner, task_name, task_payload) in tasks:
+        for owner, task_name, task_payload in tasks:
             payload.append(
                 self.__serialize_task(
                     owner,
