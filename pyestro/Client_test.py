@@ -1,4 +1,4 @@
-from maestro_python_client.Client import TaskHistory
+from pyestro.Client import TaskHistory
 
 
 def test_task_history_from_dict():

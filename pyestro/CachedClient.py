@@ -1,8 +1,8 @@
 from typing import List, Tuple
 from uuid import uuid4
 
-from maestro_python_client.abc.cache import AbstractCache
-from maestro_python_client.Client import Client, Task
+from pyestro.abc.cache import AbstractCache
+from pyestro.Client import Client, Task
 
 
 class CachedClient(Client):

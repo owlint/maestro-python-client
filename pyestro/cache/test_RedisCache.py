@@ -1,6 +1,6 @@
 from pytest import raises
 
-from maestro_python_client.cache.redis import RedisCache
+from pyestro.cache.redis import RedisCache
 from test_utils.Redis import new_test_redis
 from test_utils.String import unique_str
 

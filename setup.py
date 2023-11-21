@@ -7,7 +7,7 @@ from setuptools import find_packages, setup
 # et il comporte beaucoup de paramètres
 setup(
     # le nom de votre bibliothèque, tel qu'il apparaitre sur pypi
-    name="maestro_python_client",
+    name="pyestro",
     # la version du code
     version="0.9.7",
     # Liste les packages à insérer dans la distribution

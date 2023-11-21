@@ -4,7 +4,7 @@ import sys
 
 import click
 
-from maestro_python_client.Client import Client
+from pyestro.Client import Client
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))

@@ -3,7 +3,7 @@ import threading
 import time
 from logging import Logger
 
-from maestro_python_client.Client import Client, Task
+from pyestro.Client import Client, Task
 
 
 class TaskWorker(abc.ABC):

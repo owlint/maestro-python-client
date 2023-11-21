@@ -1,6 +1,6 @@
 from redis import Redis
 
-from maestro_python_client.abc.cache import AbstractCache
+from pyestro.abc.cache import AbstractCache
 
 
 class RedisCache(AbstractCache):

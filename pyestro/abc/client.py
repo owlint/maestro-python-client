@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from maestro_python_client.dtos.tasks import Task, TaskHistory
+from pyestro.dtos.tasks import Task, TaskHistory
 from typing import Any
 
 
