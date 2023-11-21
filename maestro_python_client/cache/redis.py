@@ -4,6 +4,7 @@ from maestro_python_client.abc.cache import AbstractCache
 
 
 class RedisCache(AbstractCache):
+
     def __init__(self, redis: Redis) -> None:
         super().__init__()
         self.__redis = redis
