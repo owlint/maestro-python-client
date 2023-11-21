@@ -1,4 +1,4 @@
-from pyestro.Client import TaskHistory
+from pyestro.dtos.tasks import TaskHistory
 
 
 def test_task_history_from_dict():

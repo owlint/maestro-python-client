@@ -1,20 +1,30 @@
 from typing import List, Tuple
 from uuid import uuid4
 
+from pyestro.abc.client import AbstractClient
+from pyestro.dtos.tasks import Task
 from pyestro.abc.cache import AbstractCache
-from pyestro.Client import Client, Task
 
 
-class CachedClient(Client):
+class CachedClient(AbstractClient):
+    """
+    A Maestro client that caches data/responses.
+
+    This implementation is more of a "Decorator" (the pattern), than a reimplementation of the
+    interface.
+
+    The decoratored behavior is the caching layer.
+    """
+
     def __init__(
         self,
-        maestro_endpoint: str,
+        client: AbstractClient,
         cache: AbstractCache,
-        cached_queues: list[str] = [],
+        cached_queues: list[str] = None,
         completed_task_ttl: int = 900,
-        **kwargs,
     ) -> None:
-        super().__init__(maestro_endpoint, **kwargs)
+        self._client = client
+        cached_queues = cached_queues or []
         self.__cached_queues: set[str] = set(cached_queues)
         self.__cache = cache
         self.__completed_task_ttl = completed_task_ttl
@@ -66,7 +76,7 @@ class CachedClient(Client):
             task_payload,
             ttl,
         )
-        return super().launch_task(
+        return self._client.launch_task(
             owner,
             queue,
             task_payload,
@@ -78,47 +88,46 @@ class CachedClient(Client):
             parent_task_id,
         )
 
-    def next(self, queue: str) -> Task | None:
-        task = super().next(queue)
+    def get_next_task(self, queue: str) -> Task | None:
+        task = self._client.get_next_task(queue)
         return self.__task_from_cache(task)
 
-    def consume(self, queue: str) -> Task | None:
-        task = super().consume(queue)
+    def consume_task(self, queue: str) -> Task | None:
+        task = self._client.consume_task(queue)
         return self.__task_from_cache(task)
 
-    def task_state(self, task_id: str) -> Task:
-        task = super().task_state(task_id)
-        return self.__task_from_cache(task)  # type: ignore
+    def get_task_state(self, task_id: str) -> Task:
+        task = self._client.get_task_state(task_id)
+        return self.__task_from_cache(task)
 
     def complete_task(self, task_id: str, result: str) -> None:
-        task = super().task_state(task_id)
+        task = self._client.get_task_state(task_id)
 
         self.__set_ttl(task.task_queue, task.payload, self.__completed_task_ttl)
         result = self.__cache_payload(
             task.task_queue, result, self.__completed_task_ttl
         )
 
-        super().complete_task(task_id, result)
+        self._client.complete_task(task_id, result)
 
     def cancel_task(self, task_id: str) -> None:
-        task = super().task_state(task_id)
+        task = self._client.get_task_state(task_id)
         self.__set_ttl(task.task_queue, task.payload, self.__completed_task_ttl)
 
-        super().cancel_task(task_id)
+        self._client.cancel_task(task_id)
 
     def fail_task(self, task_id: str) -> None:
-        task = super().task_state(task_id)
+        task = self._client.get_task_state(task_id)
         self.__set_ttl(task.task_queue, task.payload, self.__completed_task_ttl)
-
-        super().fail_task(task_id)
+        self._client.fail_task(task_id)
 
     def delete_task(self, task_id: str, consume: bool = False) -> None:
-        task = super().task_state(task_id)
+        task = self._client.get_task_state(task_id)
         self.__delete(task.task_queue, task.payload)
         if task.result:
             self.__delete(task.task_queue, task.result)
 
-        super().delete_task(task_id, consume=consume)
+        self._client.delete_task(task_id, consume=consume)
 
     def launch_task_list(
         self,
@@ -175,7 +184,7 @@ class CachedClient(Client):
                 ),
             )
 
-        return super().launch_task_list(
+        return self._client.launch_task_list(
             tasks,
             retries,
             timeout,

@@ -3,7 +3,8 @@ import threading
 import time
 from logging import Logger
 
-from pyestro.Client import Client, Task
+from pyestro.abc.client import AbstractClient
+from pyestro.dtos.tasks import Task
 
 
 class TaskWorker(abc.ABC):
@@ -14,7 +15,7 @@ class TaskWorker(abc.ABC):
 
 class MaestroTaskHandler(threading.Thread):
     def __init__(
-        self, client: Client, queue_name: str, worker: TaskWorker, logger: Logger
+        self, client: AbstractClient, queue_name: str, worker: TaskWorker, logger: Logger
     ):
         assert isinstance(worker, TaskWorker)
 
@@ -67,7 +68,7 @@ class MaestroTaskHandler(threading.Thread):
             return "", False
 
     def __try_get_task(self) -> Task | None:
-        task = self.__client.next(self.__queue)
+        task = self.__client.get_next_task(self.__queue)
         if task is None or task.task_id == "":
             return None
         return task

@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from pytest import fixture, raises
 
 from pyestro.abc.cache import AbstractCache
-from pyestro.CachedClient import CachedClient
+from pyestro.clients.cached import CachedClient
 from test_utils.String import unique_str
 
 
