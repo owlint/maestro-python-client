@@ -1,8 +1,8 @@
 from pytest import raises
 
 from pyestro.cache.redis import RedisCache
-from test_utils.Redis import new_test_redis
-from test_utils.String import unique_str
+from tests.utils.redis import new_test_redis
+from tests.utils.string import unique_str
 
 
 def test_get(subtests):

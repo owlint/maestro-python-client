@@ -6,7 +6,7 @@ from pytest import fixture, raises
 
 from pyestro.abc.cache import AbstractCache
 from pyestro.clients.cached import CachedClient
-from test_utils.String import unique_str
+from utils.string import unique_str
 
 
 @fixture
