@@ -77,7 +77,7 @@ class AbstractClient(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def consume(self, queue: str) -> Task | None:
+    def consume_task(self, queue: str) -> Task | None:
         """Consumes a task result from the queue.
 
         Consuming is getting the next result and directly removing it from
@@ -147,21 +147,6 @@ class AbstractClient(ABC):
         """Fail a task in maestro.
 
         Given its id the task is marked failed in maestro.
-
-        Args:
-            task_id: the identifier of the task
-
-        Raises:
-            FileNotFoundError: This task does not exist
-            ValueError: Error in communication with maestro
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def consume_task(self, task_id: str) -> dict[str, Any]:
-        """Consume a task from maestro.
-
-        Given its id the task is marked consumed in maestro.
 
         Args:
             task_id: the identifier of the task
