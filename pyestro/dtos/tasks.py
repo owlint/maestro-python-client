@@ -8,6 +8,7 @@ class Task(BaseModel):
     task_id: str
     owner: str
     task_queue: str
+    payload: str
     state: str
     timeout: int
     retries: int
