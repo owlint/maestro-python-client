@@ -3,3 +3,5 @@ maestro_client.egg-info
 maestro_python_client.egg-info
 .pytest_cache
 __pycache__
+.idea
+venv

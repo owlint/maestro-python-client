@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from pytest import fixture, raises
 
-from maestro_python_client.Cache.Cache import Cache
+from maestro_python_client.abc.cache import AbstractCache
 from maestro_python_client.CachedClient import CachedClient
 from test_utils.String import unique_str
 
@@ -28,7 +28,7 @@ def json_task():
     }
 
 
-class TestCache(Cache):
+class TestCache(AbstractCache):
     def __init__(self) -> None:
         super().__init__()
         self.__cache = {}

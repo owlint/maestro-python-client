@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from uuid import uuid4
 
-from maestro_python_client.Cache.Cache import Cache
+from maestro_python_client.abc.cache import AbstractCache
 from maestro_python_client.Client import Client, Task
 
 
@@ -9,7 +9,7 @@ class CachedClient(Client):
     def __init__(
         self,
         maestro_endpoint: str,
-        cache: Cache,
+        cache: AbstractCache,
         cached_queues: list[str] = [],
         completed_task_ttl: int = 900,
         **kwargs,

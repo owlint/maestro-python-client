@@ -1,9 +1,9 @@
 from redis import Redis
 
-from maestro_python_client.Cache.Cache import Cache
+from maestro_python_client.abc.cache import AbstractCache
 
 
-class RedisCache(Cache):
+class RedisCache(AbstractCache):
     def __init__(self, redis: Redis) -> None:
         super().__init__()
         self.__redis = redis
