@@ -2,14 +2,14 @@ from pyestro.abc.client import AbstractClient
 from pyestro.dtos.tasks import Task, TaskHistory
 from datetime import datetime
 from typing import Any
-from httpx import Client
+from httpx import Client as HttpClient
 
 
 class Client(AbstractClient):
     """A regular Maestro http client."""
 
     def __init__(self, base_url: str):
-        self._client = Client(base_url=base_url)
+        self._client = HttpClient(base_url=base_url)
 
     def launch_task(
         self,
