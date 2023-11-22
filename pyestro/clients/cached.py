@@ -1,8 +1,8 @@
-from typing import List, Tuple
+from typing import Any, List, Tuple
 from uuid import uuid4
 
 from pyestro.abc.client import AbstractClient
-from pyestro.dtos.tasks import Task
+from pyestro.dtos.tasks import Task, TaskHistory
 from pyestro.abc.cache import AbstractCache
 
 
@@ -194,6 +194,12 @@ class CachedClient(AbstractClient):
             parent_task_id,
         )
 
+    def get_owners_history(self, owner_ids: list[str]) -> list[TaskHistory]:
+        return self._client.get_owners_history(owner_ids=owner_ids)
+
+    def delete_owners_history(self, owner_ids: list[str]) -> dict[str, Any]:
+        return self._client.delete_owners_history(owner_ids=owner_ids)
+
     def __task_from_cache(self, task: Task | None) -> Task | None:
         if not task:
             return task
@@ -234,3 +240,5 @@ class CachedClient(AbstractClient):
     @staticmethod
     def __unique_key(queue_name: str) -> str:
         return f"maestro-cache-{queue_name}-{str(uuid4())}"
+
+
