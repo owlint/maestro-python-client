@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urljoin
 
@@ -87,21 +87,44 @@ class TaskHistory:
         )
 
 
+@dataclass(frozen=True)
+class QueueStats:
+    canceled: list[str] = field(default_factory=list)
+    completed: list[str] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
+    pending: list[str] = field(default_factory=list)
+    planned: list[str] = field(default_factory=list)
+    running: list[str] = field(default_factory=list)
+    timedout: list[str] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "QueueStats":
+        return cls(
+            canceled=payload["canceled"],
+            completed=payload["completed"],
+            failed=payload["failed"],
+            pending=payload["pending"],
+            planned=payload["planned"],
+            running=payload["running"],
+            timedout=payload["timedout"],
+        )
+
+
 class Client:
     def __init__(self, maestro_endpoint: str):
         self.__maestro_endpoint = maestro_endpoint
 
     def launch_task(
-        self,
-        owner: str,
-        queue: str,
-        task_payload: str,
-        retries: int = 0,
-        timeout: int = 900,
-        executes_in: int = 0,
-        start_timeout: int = 0,
-        callback_url: str = "",
-        parent_task_id: str = "",
+            self,
+            owner: str,
+            queue: str,
+            task_payload: str,
+            retries: int = 0,
+            timeout: int = 900,
+            executes_in: int = 0,
+            start_timeout: int = 0,
+            callback_url: str = "",
+            parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -408,15 +431,36 @@ class Client:
 
         return resp.json()
 
+    def get_queue_stats(self, queue: str) -> QueueStats:
+        """Retrieve a list of tasks with childs a list of owner IDs.
+        Args:
+            owner_ids: a list of owner ids
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/queue/stats"),
+            json={"queue": queue},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return QueueStats.from_dict(resp.json())
+
     def launch_task_list(
-        self,
-        tasks: List[Tuple[str, str, str]],
-        retries: int = 0,
-        timeout: int = 900,
-        executes_in: int = 0,
-        start_timeout: int = 0,
-        callback_url: str = "",
-        parent_task_id: str = "",
+            self,
+            tasks: List[Tuple[str, str, str]],
+            retries: int = 0,
+            timeout: int = 900,
+            executes_in: int = 0,
+            start_timeout: int = 0,
+            callback_url: str = "",
+            parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -471,15 +515,15 @@ class Client:
 
     @staticmethod
     def __serialize_task(
-        owner: str,
-        queue: str,
-        task_payload: str,
-        retries: int,
-        timeout: int,
-        executes_in: int,
-        start_timeout: int,
-        callback_url: str,
-        parent_task_id: str,
+            owner: str,
+            queue: str,
+            task_payload: str,
+            retries: int,
+            timeout: int,
+            executes_in: int,
+            start_timeout: int,
+            callback_url: str,
+            parent_task_id: str,
     ) -> dict[str, Any]:
         task = {
             "owner": owner,

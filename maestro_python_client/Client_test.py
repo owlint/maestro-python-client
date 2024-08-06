@@ -1,4 +1,4 @@
-from maestro_python_client.Client import TaskHistory
+from maestro_python_client.Client import TaskHistory, QueueStats
 
 
 def test_task_history_from_dict():
@@ -31,3 +31,24 @@ def test_task_history_from_dict():
     assert task.not_before == 5
     assert task.start_timeout == 6
     assert task.consumed is True
+
+
+def test_queue_stats_from_dict():
+    queue_stats = QueueStats.from_dict(
+        {
+            "canceled": ["Task-0"],
+            "completed": ["Task-6"],
+            "failed": [],
+            "pending": ["Task-1", "Task-4", "Task-3", "Task-5"],
+            "planned": [],
+            "running": ["Task-2"],
+            "timedout": ["Task-7"],
+        }
+    )
+    assert queue_stats.canceled == ["Task-0"]
+    assert queue_stats.completed == ["Task-6"]
+    assert queue_stats.failed == []
+    assert queue_stats.planned == []
+    assert queue_stats.pending == ["Task-1", "Task-4", "Task-3", "Task-5"]
+    assert queue_stats.running == ["Task-2"]
+    assert queue_stats.timedout == ["Task-7"]
