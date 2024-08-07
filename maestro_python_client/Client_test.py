@@ -1,4 +1,4 @@
-from maestro_python_client.Client import TaskHistory, QueueStats
+from maestro_python_client.Client import QueueStats, TaskHistory
 
 
 def test_task_history_from_dict():

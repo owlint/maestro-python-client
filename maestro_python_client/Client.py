@@ -115,16 +115,16 @@ class Client:
         self.__maestro_endpoint = maestro_endpoint
 
     def launch_task(
-            self,
-            owner: str,
-            queue: str,
-            task_payload: str,
-            retries: int = 0,
-            timeout: int = 900,
-            executes_in: int = 0,
-            start_timeout: int = 0,
-            callback_url: str = "",
-            parent_task_id: str = "",
+        self,
+        owner: str,
+        queue: str,
+        task_payload: str,
+        retries: int = 0,
+        timeout: int = 900,
+        executes_in: int = 0,
+        start_timeout: int = 0,
+        callback_url: str = "",
+        parent_task_id: str = "",
     ) -> str:
         """Launches a task.
 
@@ -453,14 +453,14 @@ class Client:
         return QueueStats.from_dict(resp.json())
 
     def launch_task_list(
-            self,
-            tasks: List[Tuple[str, str, str]],
-            retries: int = 0,
-            timeout: int = 900,
-            executes_in: int = 0,
-            start_timeout: int = 0,
-            callback_url: str = "",
-            parent_task_id: str = "",
+        self,
+        tasks: List[Tuple[str, str, str]],
+        retries: int = 0,
+        timeout: int = 900,
+        executes_in: int = 0,
+        start_timeout: int = 0,
+        callback_url: str = "",
+        parent_task_id: str = "",
     ) -> List[str]:
         """Launches a list a task.
 
@@ -515,15 +515,15 @@ class Client:
 
     @staticmethod
     def __serialize_task(
-            owner: str,
-            queue: str,
-            task_payload: str,
-            retries: int,
-            timeout: int,
-            executes_in: int,
-            start_timeout: int,
-            callback_url: str,
-            parent_task_id: str,
+        owner: str,
+        queue: str,
+        task_payload: str,
+        retries: int,
+        timeout: int,
+        executes_in: int,
+        start_timeout: int,
+        callback_url: str,
+        parent_task_id: str,
     ) -> dict[str, Any]:
         task = {
             "owner": owner,
