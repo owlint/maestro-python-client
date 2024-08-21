@@ -432,9 +432,9 @@ class Client:
         return resp.json()
 
     def get_queue_stats(self, queue: str) -> QueueStats:
-        """Retrieve a list of tasks with childs a list of owner IDs.
+        """Retrieve the stats of the tasks in a specific queue.
         Args:
-            owner_ids: a list of owner ids
+            queue: the target queue
 
         Raises:
             ValueError: Error in communication with maestro
@@ -442,6 +442,27 @@ class Client:
         resp = requests.post(
             urljoin(self.__maestro_endpoint, "/api/queue/stats"),
             json={"queue": queue},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return QueueStats.from_dict(resp.json())
+
+    def get_queue_owner_stats(self, queue: str, owner: str) -> QueueStats:
+        """Retrieve the stats of the tasks of a given owner in a specific queue.
+        Args:
+            queue: the target queue
+            owner: task owner id
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.get(
+            urljoin(self.__maestro_endpoint, f"/api/queue/{queue}/owner/{owner}/stats")
         )
 
         if resp.status_code > 400 or "error" in resp.json():
