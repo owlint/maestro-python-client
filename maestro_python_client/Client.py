@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Tuple, Union
 from urllib.parse import urljoin
 
@@ -84,6 +84,29 @@ class TaskHistory:
             not_before=payload["not_before"],
             start_timeout=payload["start_timeout"],
             consumed=payload["consumed"],
+        )
+
+
+@dataclass(frozen=True)
+class QueueStats:
+    canceled: list[str] = field(default_factory=list)
+    completed: list[str] = field(default_factory=list)
+    failed: list[str] = field(default_factory=list)
+    pending: list[str] = field(default_factory=list)
+    planned: list[str] = field(default_factory=list)
+    running: list[str] = field(default_factory=list)
+    timedout: list[str] = field(default_factory=list)
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "QueueStats":
+        return cls(
+            canceled=payload["canceled"],
+            completed=payload["completed"],
+            failed=payload["failed"],
+            pending=payload["pending"],
+            planned=payload["planned"],
+            running=payload["running"],
+            timedout=payload["timedout"],
         )
 
 
@@ -407,6 +430,48 @@ class Client:
             )
 
         return resp.json()
+
+    def get_queue_stats(self, queue: str) -> QueueStats:
+        """Retrieve the stats of the tasks in a specific queue.
+        Args:
+            queue: the target queue
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.post(
+            urljoin(self.__maestro_endpoint, "/api/queue/stats"),
+            json={"queue": queue},
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return QueueStats.from_dict(resp.json())
+
+    def get_queue_owner_stats(self, queue: str, owner: str) -> QueueStats:
+        """Retrieve the stats of the tasks of a given owner in a specific queue.
+        Args:
+            queue: the target queue
+            owner: task owner id
+
+        Raises:
+            ValueError: Error in communication with maestro
+        """
+        resp = requests.get(
+            urljoin(self.__maestro_endpoint, f"/api/queue/{queue}/owner/{owner}/stats")
+        )
+
+        if resp.status_code > 400 or "error" in resp.json():
+            raise ValueError(
+                f"Could not communicate with maestro. Status code is {resp.status_code}, "
+                f"response is {resp.content}"
+            )
+
+        return QueueStats.from_dict(resp.json())
 
     def launch_task_list(
         self,
