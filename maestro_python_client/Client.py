@@ -110,6 +110,29 @@ class QueueStats:
         )
 
 
+@dataclass(frozen=True)
+class QueueOwnerStats:
+    canceled: int = 0
+    completed: int = 0
+    failed: int = 0
+    pending: int = 0
+    planned: int = 0
+    running: int = 0
+    timedout: int = 0
+
+    @classmethod
+    def from_dict(cls, payload: dict[str, Any]) -> "QueueOwnerStats":
+        return cls(
+            canceled=payload["canceled"],
+            completed=payload["completed"],
+            failed=payload["failed"],
+            pending=payload["pending"],
+            planned=payload["planned"],
+            running=payload["running"],
+            timedout=payload["timedout"],
+        )
+
+
 class Client:
     def __init__(self, maestro_endpoint: str):
         self.__maestro_endpoint = maestro_endpoint
@@ -452,7 +475,7 @@ class Client:
 
         return QueueStats.from_dict(resp.json())
 
-    def get_queue_owner_stats(self, queue: str, owner: str) -> QueueStats:
+    def get_queue_owner_stats(self, queue: str, owner: str) -> QueueOwnerStats:
         """Retrieve the stats of the tasks of a given owner in a specific queue.
         Args:
             queue: the target queue
@@ -471,7 +494,7 @@ class Client:
                 f"response is {resp.content}"
             )
 
-        return QueueStats.from_dict(resp.json())
+        return QueueOwnerStats.from_dict(resp.json())
 
     def launch_task_list(
         self,

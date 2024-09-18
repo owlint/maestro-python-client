@@ -36,19 +36,19 @@ def test_task_history_from_dict():
 def test_queue_stats_from_dict():
     queue_stats = QueueStats.from_dict(
         {
-            "canceled": ["Task-0"],
-            "completed": ["Task-6"],
-            "failed": [],
-            "pending": ["Task-1", "Task-4", "Task-3", "Task-5"],
-            "planned": [],
-            "running": ["Task-2"],
-            "timedout": ["Task-7"],
+            "canceled": 1,
+            "completed": 1,
+            "failed": 0,
+            "pending": 4,
+            "planned": 0,
+            "running": 1,
+            "timedout": 1,
         }
     )
-    assert queue_stats.canceled == ["Task-0"]
-    assert queue_stats.completed == ["Task-6"]
-    assert queue_stats.failed == []
-    assert queue_stats.planned == []
-    assert queue_stats.pending == ["Task-1", "Task-4", "Task-3", "Task-5"]
-    assert queue_stats.running == ["Task-2"]
-    assert queue_stats.timedout == ["Task-7"]
+    assert queue_stats.canceled == 1
+    assert queue_stats.completed == 1
+    assert queue_stats.failed == 0
+    assert queue_stats.planned == 0
+    assert queue_stats.pending == 4
+    assert queue_stats.running == 1
+    assert queue_stats.timedout == 1
