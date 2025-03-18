@@ -580,9 +580,9 @@ class Client:
         }
 
         if executes_in > 0:
-            task["not_before"] = datetime.datetime.now().timestamp() + executes_in
+            task["not_before"] = int(datetime.datetime.now().timestamp()) + executes_in
 
         if start_timeout > 0:
-            task["startTimeout"] = datetime.datetime.now().timestamp() + executes_in
+            task["startTimeout"] = int(datetime.datetime.now().timestamp()) + executes_in
 
         return task
